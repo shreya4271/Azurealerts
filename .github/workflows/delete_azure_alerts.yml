@@ -1,1 +1,28 @@
+name: Delete Azure Alerts
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  delete_azure_alerts:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Trigger Azure DevOps pipeline
+      run: |
+        curl -X POST \
+          -u $(AZURE_DEVOPS_USERNAME):$(AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN) \
+          -H "Content-Type: application/json" \
+          -d '{"definition": {"id": $(AZURE_DEVOPS_PIPELINE_ID)}}' \
+          https://dev.azure.com/$(AZURE_DEVOPS_ORGANIZATION)/$(AZURE_DEVOPS_PROJECT)/_apis/pipelines/$(AZURE_DEVOPS_PIPELINE_ID)/runs?api-version=6.0-preview.1
+      env:
+        AZURE_DEVOPS_USERNAME: ${{ secrets.AZURE_DEVOPS_USERNAME }}
+        AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN: ${{ secrets.AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN }}
+        AZURE_DEVOPS_PIPELINE_ID: <pipeline_id>
+        AZURE_DEVOPS_ORGANIZATION: <organization>
+        AZURE_DEVOPS_PROJECT: <project>
 
